@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:aop="http://www.springframework.org/schema/aop"
+  xmlns:mvc="http://www.springframework.org/schema/mvc"
+  xmlns:bean="http://www.springframework.org/schema/beans"
+  xmlns:context="http://www.springframework.org/schema/context"
+  xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+    http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd"
+  default-lazy-init="true" default-autowire="byName">
+  
+  <description>SpringMvc配置文件</description>
+
+  <context:annotation-config/>
+  <context:component-scan base-package="com.future" />
+
+  <!-- 默认的注解映射的支持 ,启动注解功能
+  <mvc:annotation-driven />  -->
+
+  <!--<mvc:annotation-driven  />关于  注解  http://blog.163.com/zsq303288862@126/blog/static/93745961201262652231478/
+  mvc注解的支持 相当于注册了DefaultAnnotationHandlerMapping和AnnotationMethodHandlerAdapter两个bean，配置一些messageconverter -->
+  <mvc:annotation-driven>
+    <mvc:message-converters register-defaults="true">
+      <ref bean="stringHttpMessageConverter" />
+      <ref bean="fastJsonHttpMessageConverter" />
+      <!--<ref bean="mappingJacksonHttpMessageConverter" />
+      <ref bean="marshallingHttpMessageConverter" /> -->
+    </mvc:message-converters>
+  </mvc:annotation-driven>
+
+
+  <!--  解决ajax返回string乱码 -->
+  <bean id="stringHttpMessageConverter" class="org.springframework.http.converter.StringHttpMessageConverter">
+    <property name="supportedMediaTypes">
+      <list>
+        <value>text/html;charset=UTF-8</value><!-- 用别的将走fastjson -->
+        <value>application/json;charset=UTF-8</value>
+        <!-- <value>text/plain;charset=UTF-8</value> -->
+      </list>
+    </property>
+  </bean>
+
+  <!-- fastJson 避免IE出现下载JSON文件的情况 -->
+    <bean id="fastJsonHttpMessageConverter" class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+        <property name="supportedMediaTypes">
+            <list>
+              <!-- 这里顺序不能反，一定先写text/html,不然ie下出现下载提示 -->
+                <value>text/html;charset=UTF-8</value><!-- 避免IE出现下载JSON文件的情况 -->
+                <value>application/json;charset=UTF-8</value>
+            </list>
+        </property>
+        <property name="features">
+          <array>
+            <!-- http://www.tuicool.com/articles/nu6ZFza
+            QuoteFieldNames 输出key时是否使用双引号,默认为true
+            WriteMapNullValue 是否输出值为null的字段,默认为false
+            WriteNullNumberAsZero 数值字段如果为null,输出为0,而非null
+            WriteNullListAsEmpty List字段如果为null,输出为[],而非null
+            WriteNullStringAsEmpty 字符类型字段如果为null,输出为"",而非null
+            WriteNullBooleanAsFalse Boolean字段如果为null,输出为false,而非null
+            DisableCheckSpecialChar 一个对象的字符串属性中如果有特殊字符如双引号，将会在转成json时带有反斜杠转移符。如果不需要转义，可以使用这个属性。默认为false
+            BrowserCompatible 汉字Unicode转码
+            SerializerFeature.BrowserSecure 全部转码-->
+            <value>BrowserCompatible</value>
+            <value>DisableCircularReferenceDetect</value>
+            <value>WriteMapNullValue</value>
+            </array>
+          </property>
+    </bean>
+
+</beans>
